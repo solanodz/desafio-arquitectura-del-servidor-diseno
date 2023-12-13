@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import ProductsController from '../controllers/products.controller.js';
 import ProductModel from '../models/product.model.js'
 
 const router = Router();
 
-router.get('/products', async (req, res) => {
+router.get('/products', async (req, res, next) => {
+
     const { page = 1, limit = 10, sort, query } = req.query;
     const opts = { page, limit };
     const criteria = {};
@@ -33,8 +35,8 @@ router.get('/products', async (req, res) => {
 
         res.render('products', buildResponse(result, sort));
     } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ message: 'Error en la solicitud.' });
+        console.log('Ha ocurrido un error durante la busqueda de productos ⛔');
+        next(error)
     }
 });
 
@@ -56,36 +58,48 @@ const buildResponse = (data, sort = '') => {
     };
 }
 
-router.get('/products/:pid', async (req, res) => {
-    const { pid } = req.params;
-    const products = await ProductModel.findOne({ _id: pid });
-    if (!products) {
-        return res.status(404).json({ message: `⛔ Product with the id "${pid}" not found` });
-    }
-    res.status(200).json(products);
-})
-
-router.post('/products', async (req, res) => {
+router.get('/products/:pid', async (req, res, next) => {
     try {
-        const { body } = req;
-        const products = await ProductModel.create(body);
-        res.status(201).json(products);
+        const { params: { pid } } = req;
+        const product = await ProductsController.getById(pid, req.body);
+        res.status(200).json(product)
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.log(`Ha ocurrido un error durante la busqueda del producto con ID ${pid} ⛔`);
+        next(error)
     }
 })
 
-router.put('/products/:pid', async (req, res) => {
-    const { pid } = req.params;
-    const { body } = req;
-    const result = await ProductModel.updateOne({ _id: pid }, { $set: body })
-    res.status(204).end();
+router.post('/products', async (req, res, next) => {
+    try {
+        const newProduct = await ProductsController.create(req.body);
+        res.status(201).json(newProduct)
+    } catch (error) {
+        console.log('Ha ocurrido un error durante la creación del producto ⛔');
+        next(error)
+    }
 })
 
-router.delete('/products/:pid', async (req, res) => {
-    const { pid } = req.params;
-    await ProductModel.deleteOne({ _id: pid })
-    res.status(204).end();
+router.put('/products/:pid', async (req, res, next) => {
+
+    try {
+        const { params: { pid } } = req;
+        await ProductsController.updateById(pid, req.body);
+        res.status(204).end()
+    } catch (error) {
+        console.log('Ha ocurrido un error durante la actualización del producto ⛔');
+        next(error)
+    }
+})
+
+router.delete('/products/:pid', async (req, res, next) => {
+    try {
+        const { params: { pid } } = req;
+        await ProductsController.deleteById(pid);
+        res.status(204).end()
+    } catch (error) {
+        console.log('Ha ocurrido un error durante la eliminación del producto ⛔');
+        next(error)
+    }
 })
 
 export default router;

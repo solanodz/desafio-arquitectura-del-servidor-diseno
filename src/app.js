@@ -8,14 +8,16 @@ import cookieParser from 'cookie-parser'
 
 import { URI } from './db/mongodb.js';
 import indexRouter from './routers/index.router.js';
-import sessionsRouter from './routers/sessions.router.js';
+// import sessionsRouter from './routers/sessions.router.js';
 import productsRouter from './routers/product.router.js';
+import usersRouter from './routers/users.router.js';
 import { init as initPassportConfig } from './config/passport.config.js'
 import { __dirname } from './utils.js';
+import config from './config.js';
 
 
 const app = express();
-const SESSION_SECRET = "}_K>k2:*Ip]A:Pa_1v=£rfBk=92£Zz|";
+const SESSION_SECRET = config.sessionSecret;
 
 app.use(expressSessions({
     secret: SESSION_SECRET,
@@ -41,9 +43,9 @@ initPassportConfig()
 app.use(passport.initialize());
 app.use(passport.session())
 
-app.use('/', indexRouter);
-app.use('/sessions', sessionsRouter); // Cambiado a '/sessions'
-app.use('/', productsRouter);
+// app.use('/', );
+// app.use('/sessions', sessionsRouter);
+app.use('/', productsRouter, usersRouter, indexRouter);
 
 app.use((error, req, res, next) => {
     const message = `⛔ Ha ocurrido un error desconocido: ${error.message}.`;

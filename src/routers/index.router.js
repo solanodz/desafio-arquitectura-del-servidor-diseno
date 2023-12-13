@@ -15,17 +15,14 @@ const privateRouter = (req, res, next) => {
     if (!req.session.user) {
         return res.redirect('/sessions/login'); // Ruta absoluta
     }
-
     // Si el usuario no es admin y trata de acceder a /profile, redirigir a /sessions/login
     if (req.path === '/profile' && req.session.user.role !== 'admin') {
         return res.redirect('/sessions/login'); // Ruta absoluta
     }
-
     // Si el correo es 'adminCoder@coder.com', redirigir a /profile
     if (req.session.user.email === 'adminCoder@coder.com') {
         return res.redirect('/profile'); // Ruta absoluta
     }
-
     next();
 };
 

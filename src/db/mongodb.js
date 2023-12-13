@@ -1,6 +1,7 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
+import config from '../config.js';
 
-export const URI = 'mongodb+srv://solanodz:9CTacOfBypakyJx3@cluster0.w0s099h.mongodb.net/desafio-complementario-2';
+export const URI = config.db.mongodbUri;
 
 export const init = async () => {
     try {
